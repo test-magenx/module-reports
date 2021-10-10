@@ -36,7 +36,7 @@ class TotalsTest extends AbstractControllerTest
     /**
      * @return void
      */
-    public function testExecute(): void
+    public function testExecute()
     {
         $titleMock = $this->getMockBuilder(Title::class)
             ->disableOriginalConstructor()
@@ -62,12 +62,17 @@ class TotalsTest extends AbstractControllerTest
             ->method('setActive')
             ->with('Magento_Reports::report_customers_totals');
         $this->breadcrumbsBlockMock
+            ->expects($this->at(0))
             ->method('addLink')
-            ->withConsecutive(
-                [new Phrase('Reports'), new Phrase('Reports')],
-                [new Phrase('Customers'), new Phrase('Customers')],
-                [new Phrase('Customers by Orders Total'), new Phrase('Customers by Orders Total')]
-            );
+            ->with(new Phrase('Reports'), new Phrase('Reports'));
+        $this->breadcrumbsBlockMock
+            ->expects($this->at(1))
+            ->method('addLink')
+            ->with(new Phrase('Customers'), new Phrase('Customers'));
+        $this->breadcrumbsBlockMock
+            ->expects($this->at(2))
+            ->method('addLink')
+            ->with(new Phrase('Customers by Orders Total'), new Phrase('Customers by Orders Total'));
         $this->totals->execute();
     }
 }

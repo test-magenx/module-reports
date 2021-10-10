@@ -106,7 +106,7 @@ class EventTest extends TestCase
     /**
      * @return void
      */
-    public function testUpdateCustomerTypeWithoutType(): void
+    public function testUpdateCustomerTypeWithoutType()
     {
         $eventMock = $this->getMockBuilder(\Magento\Reports\Model\Event::class)
             ->disableOriginalConstructor()
@@ -121,7 +121,7 @@ class EventTest extends TestCase
     /**
      * @return void
      */
-    public function testUpdateCustomerTypeWithType(): void
+    public function testUpdateCustomerTypeWithType()
     {
         $eventMock = $this->getMockBuilder(\Magento\Reports\Model\Event::class)
             ->disableOriginalConstructor()
@@ -134,20 +134,20 @@ class EventTest extends TestCase
     }
 
     /**
-     * @param int|null $storeId
-     * @param array|null $storeIdSelect
+     * @dataProvider getApplyLogToCollectionDataProvider
+     * @param null|array $storeId
+     * @param null|array $storeIdSelect
      *
      * @return void
-     * @dataProvider getApplyLogToCollectionDataProvider
      */
-    public function testApplyLogToCollection(?int $storeId, ?array $storeIdSelect): void
+    public function testApplyLogToCollection($storeId, $storeIdSelect)
     {
         $derivedSelect = 'SELECT * FROM table';
         $idFieldName = 'IdFieldName';
 
         $collectionSelectMock = $this->getMockBuilder(Select::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['joinInner', 'order'])
+            ->setMethods(['joinInner', 'order'])
             ->getMock();
         $collectionSelectMock
             ->expects($this->once())
@@ -164,8 +164,7 @@ class EventTest extends TestCase
             ->willReturnSelf();
 
         $collectionMock = $this->getMockBuilder(AbstractDb::class)
-            ->onlyMethods(['getResource', 'getIdFieldName', 'getSelect'])
-            ->addMethods(['getStoreId'])
+            ->setMethods(['getResource', 'getIdFieldName', 'getSelect', 'getStoreId'])
             ->disableOriginalConstructor()
             ->getMock();
         $collectionMock
@@ -187,7 +186,7 @@ class EventTest extends TestCase
 
         $selectMock = $this->getMockBuilder(Select::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['where', '__toString', 'from', 'group', 'joinInner'])
+            ->setMethods(['from', 'where', 'group', 'joinInner', '__toString'])
             ->getMock();
         $selectMock
             ->expects($this->once())
@@ -231,17 +230,17 @@ class EventTest extends TestCase
     /**
      * @return array
      */
-    public function getApplyLogToCollectionDataProvider(): array
+    public function getApplyLogToCollectionDataProvider()
     {
         return [
             ['storeId' => 1, 'storeIdSelect' => [1]],
-            ['storeId' => null, 'storeIdSelect' => [1]]
+            ['storeId' => null, 'storeIdSelect' => [1]],
         ];
     }
     /**
      * @return void
      */
-    public function testClean(): void
+    public function testClean()
     {
         $eventMock = $this->getMockBuilder(\Magento\Reports\Model\Event::class)
             ->disableOriginalConstructor()
@@ -249,13 +248,13 @@ class EventTest extends TestCase
 
         $selectMock = $this->getMockBuilder(Select::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['where', 'limit', 'from', 'joinLeft'])
-            ->addMethods(['select', 'fetchCol'])
+            ->setMethods(['select', 'from', 'joinLeft', 'where', 'limit', 'fetchCol'])
             ->getMock();
 
         $this->connectionMock
+            ->expects($this->at(1))
             ->method('fetchCol')
-            ->willReturnOnConsecutiveCalls(1);
+            ->willReturn(1);
         $this->connectionMock
             ->expects($this->any())
             ->method('delete');

@@ -142,7 +142,7 @@ class CollectionTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $this->orderFactoryMock = $this->getMockBuilder(OrderFactory::class)
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->disableOriginalConstructor()
             ->getMock();
         $this->selectMock = $this->getMockBuilder(Select::class)
@@ -170,7 +170,7 @@ class CollectionTest extends TestCase
             ->willReturn([]);
 
         $this->connectionMock = $this->getMockBuilder(Mysql::class)
-            ->onlyMethods(['select', 'getIfNullSql', 'getDateFormatSql', 'prepareSqlCondition', 'getCheckSql'])
+            ->setMethods(['select', 'getIfNullSql', 'getDateFormatSql', 'prepareSqlCondition', 'getCheckSql'])
             ->disableOriginalConstructor()
             ->getMock();
         $this->connectionMock
@@ -206,7 +206,7 @@ class CollectionTest extends TestCase
     /**
      * @return void
      */
-    public function testCheckIsLive(): void
+    public function testCheckIsLive()
     {
         $range = '';
         $this->scopeConfigMock
@@ -225,11 +225,10 @@ class CollectionTest extends TestCase
      * @param string $mainTable
      * @param int $isFilter
      * @param InvokedCount $getIfNullSqlResult
-     *
-     * @return void
      * @dataProvider useAggregatedDataDataProvider
+     * @return void
      */
-    public function testPrepareSummary($useAggregatedData, $mainTable, $isFilter, $getIfNullSqlResult): void
+    public function testPrepareSummary($useAggregatedData, $mainTable, $isFilter, $getIfNullSqlResult)
     {
         $range = '';
         $customStart = 1;
@@ -254,8 +253,9 @@ class CollectionTest extends TestCase
             ->willReturn($orderMock);
 
         $this->resourceMock
+            ->expects($this->at(0))
             ->method('getTable')
-            ->withConsecutive([$mainTable]);
+            ->with($mainTable);
 
         $this->connectionMock
             ->expects($getIfNullSqlResult)
@@ -269,11 +269,10 @@ class CollectionTest extends TestCase
      * @param string $customStart
      * @param string $customEnd
      * @param string $expectedInterval
-     *
-     * @return void
      * @dataProvider firstPartDateRangeDataProvider
+     * @return void
      */
-    public function testGetDateRangeFirstPart($range, $customStart, $customEnd, $expectedInterval): void
+    public function testGetDateRangeFirstPart($range, $customStart, $customEnd, $expectedInterval)
     {
         $timeZoneToReturn = date_default_timezone_get();
         date_default_timezone_set('UTC');
@@ -292,7 +291,7 @@ class CollectionTest extends TestCase
      * @dataProvider secondPartDateRangeDataProvider
      * @return void
      */
-    public function testGetDateRangeSecondPart($range, $customStart, $customEnd, $config): void
+    public function testGetDateRangeSecondPart($range, $customStart, $customEnd, $config)
     {
         $this->scopeConfigMock
             ->expects($this->once())
@@ -310,7 +309,7 @@ class CollectionTest extends TestCase
     /**
      * @return void
      */
-    public function testGetDateRangeWithReturnObject(): void
+    public function testGetDateRangeWithReturnObject()
     {
         $this->assertCount(2, $this->collection->getDateRange('7d', '', '', true));
         $this->assertCount(3, $this->collection->getDateRange('7d', '', '', false));
@@ -319,7 +318,7 @@ class CollectionTest extends TestCase
     /**
      * @return void
      */
-    public function testAddItemCountExpr(): void
+    public function testAddItemCountExpr()
     {
         $this->selectMock
             ->expects($this->once())
@@ -333,11 +332,10 @@ class CollectionTest extends TestCase
      * @param int $useAggregatedData
      * @param string $mainTable
      * @param InvokedCount $getIfNullSqlResult
-     *
-     * @return void
      * @dataProvider totalsDataProvider
+     * @return void
      */
-    public function testCalculateTotals($isFilter, $useAggregatedData, $mainTable, $getIfNullSqlResult): void
+    public function testCalculateTotals($isFilter, $useAggregatedData, $mainTable, $getIfNullSqlResult)
     {
         $this->scopeConfigMock
             ->expects($this->once())
@@ -349,6 +347,7 @@ class CollectionTest extends TestCase
             ->willReturn($useAggregatedData);
 
         $this->resourceMock
+            ->expects($this->at(0))
             ->method('getTable')
             ->with($mainTable);
 
@@ -364,11 +363,10 @@ class CollectionTest extends TestCase
      * @param int $isFilter
      * @param string $useAggregatedData
      * @param string $mainTable
-     *
-     * @return void
      * @dataProvider salesDataProvider
+     * @return void
      */
-    public function testCalculateSales($isFilter, $useAggregatedData, $mainTable): void
+    public function testCalculateSales($isFilter, $useAggregatedData, $mainTable)
     {
         $this->scopeConfigMock
             ->expects($this->once())
@@ -389,6 +387,7 @@ class CollectionTest extends TestCase
             ->willReturn($storeMock);
 
         $this->resourceMock
+            ->expects($this->at(0))
             ->method('getTable')
             ->with($mainTable);
 
@@ -398,14 +397,15 @@ class CollectionTest extends TestCase
     /**
      * @return void
      */
-    public function testSetDateRange(): void
+    public function testSetDateRange()
     {
         $fromDate = '1';
         $toDate = '2';
 
         $this->connectionMock
+            ->expects($this->at(0))
             ->method('prepareSqlCondition')
-            ->withConsecutive(['`created_at`', ['from' => $fromDate, 'to' => $toDate]]);
+            ->with('`created_at`', ['from' => $fromDate, 'to' => $toDate]);
 
         $this->collection->setDateRange($fromDate, $toDate);
     }
@@ -413,11 +413,10 @@ class CollectionTest extends TestCase
     /**
      * @param array $storeIds
      * @param array $parameters
-     *
-     * @return void
      * @dataProvider storesDataProvider
+     * @return void
      */
-    public function testSetStoreIds($storeIds, $parameters): void
+    public function testSetStoreIds($storeIds, $parameters)
     {
         $this->connectionMock
             ->expects($this->any())
@@ -436,7 +435,7 @@ class CollectionTest extends TestCase
     /**
      * @return array
      */
-    public function useAggregatedDataDataProvider(): array
+    public function useAggregatedDataDataProvider()
     {
         return [
             [1, 'sales_order_aggregated_created', 0, $this->never()],
@@ -448,7 +447,7 @@ class CollectionTest extends TestCase
     /**
      * @return array
      */
-    public function firstPartDateRangeDataProvider(): array
+    public function firstPartDateRangeDataProvider()
     {
         return [
             ['', '', '', '0 0 0 23:59:59'],
@@ -460,7 +459,7 @@ class CollectionTest extends TestCase
     /**
      * @return array
      */
-    public function secondPartDateRangeDataProvider(): array
+    public function secondPartDateRangeDataProvider()
     {
         return [
             ['1m', 1, 10, 'reports/dashboard/mtd_start'],
@@ -472,7 +471,7 @@ class CollectionTest extends TestCase
     /**
      * @return array
      */
-    public function totalsDataProvider(): array
+    public function totalsDataProvider()
     {
         return [
             [1, 1, 'sales_order_aggregated_created', $this->never()],
@@ -485,7 +484,7 @@ class CollectionTest extends TestCase
     /**
      * @return array
      */
-    public function salesDataProvider(): array
+    public function salesDataProvider()
     {
         return [
             [1, 1, 'sales_order_aggregated_created'],
@@ -498,7 +497,7 @@ class CollectionTest extends TestCase
     /**
      * @return array
      */
-    public function storesDataProvider(): array
+    public function storesDataProvider()
     {
         $firstReturn = [
             'subtotal' => 'SUM(main_table.base_subtotal * main_table.base_to_global_rate)',
@@ -521,7 +520,7 @@ class CollectionTest extends TestCase
             'total' => 'SUM(main_table.base_grand_total)',
             'invoiced' => 'SUM(main_table.base_total_paid)',
             'refunded' => 'SUM(main_table.base_total_refunded)',
-            'profit' => 'SUM(text) + SUM(text) - SUM(text) - SUM(text) - SUM(text)'
+            'profit' => 'SUM(text) + SUM(text) - SUM(text) - SUM(text) - SUM(text)',
         ];
 
         return [

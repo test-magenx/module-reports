@@ -16,7 +16,7 @@ use Magento\Reports\Test\Unit\Controller\Adminhtml\Report\AbstractControllerTest
 class OrdersTest extends AbstractControllerTest
 {
     /**
-     * @var Orders
+     * @var \Magento\Reports\Controller\Adminhtml\Report\Customer\Orders
      */
     protected $orders;
 
@@ -36,7 +36,7 @@ class OrdersTest extends AbstractControllerTest
     /**
      * @return void
      */
-    public function testExecute(): void
+    public function testExecute()
     {
         $titleMock = $this->getMockBuilder(Title::class)
             ->disableOriginalConstructor()
@@ -62,12 +62,17 @@ class OrdersTest extends AbstractControllerTest
             ->method('setActive')
             ->with('Magento_Reports::report_customers_orders');
         $this->breadcrumbsBlockMock
+            ->expects($this->at(0))
             ->method('addLink')
-            ->withConsecutive(
-                [new Phrase('Reports'), new Phrase('Reports')],
-                [new Phrase('Customers'), new Phrase('Customers')],
-                [new Phrase('Customers by Number of Orders'), new Phrase('Customers by Number of Orders')]
-            );
+            ->with(new Phrase('Reports'), new Phrase('Reports'));
+        $this->breadcrumbsBlockMock
+            ->expects($this->at(1))
+            ->method('addLink')
+            ->with(new Phrase('Customers'), new Phrase('Customers'));
+        $this->breadcrumbsBlockMock
+            ->expects($this->at(2))
+            ->method('addLink')
+            ->with(new Phrase('Customers by Number of Orders'), new Phrase('Customers by Number of Orders'));
         $this->orders->execute();
     }
 }
